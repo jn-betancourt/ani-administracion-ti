@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  ani-web-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ani-web-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - STORAGE_PATH=/app/storage/nfs_docs
+      - JWT_SECRET=ani_seguridad_infraestructura_secret_2026_jwt
+      - NTP_SERVER=10.88.199.10
+      - NFS_SERVER=10.88.199.10:/srv/nfs/ani_docs
+      - SAMBA_SERVER=//10.88.199.10/ani_docs
+      - NIS_DOMAIN=ani.lan
+      - CUPS_SERVER=ipp://10.88.199.10:631/printers/ani_sede_principal
+    volumes:
+      - ./storage/nfs_docs:/app/storage/nfs_docs
+    networks:
+      - ani-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ani-api.rule=Host(`api.ani.ingeniero.app`) || Host(`ani.local`)"
+      - "traefik.http.routers.ani-api.entrypoints=web"
+      - "traefik.http.services.ani-api.loadbalancer.server.port=3000"
+
+networks:
+  ani-net:
+    driver: bridge

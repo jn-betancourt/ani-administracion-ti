@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+storage/nfs_docs/*
+!storage/nfs_docs/.gitkeep
+!storage/nfs_docs/samples/
+npm-debug.log*
+.DS_Store

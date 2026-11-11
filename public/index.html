@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ANI - Agencia Nacional de Infraestructura | Portal Oficial y Servicios de TI</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏛️</text></svg>">
+</head>
+<body>
+
+  <!-- Barra de Gobierno -->
+  <div class="gov-bar">
+    <div>🇨🇴 República de Colombia | Ministerio de Transporte</div>
+    <div>Portal de Transparencia y Acceso a la Información Pública</div>
+  </div>
+
+  <!-- Header Principal -->
+  <header class="main-header">
+    <div class="header-container">
+      <div class="brand-wrapper">
+        <div style="font-size: 2rem;">🛣️</div>
+        <div class="brand-text">
+          <h1>Agencia Nacional de Infraestructura</h1>
+          <span>Servicios Web y Consolidación de Infraestructura de TI</span>
+        </div>
+      </div>
+      <nav class="nav-links">
+        <a href="#proyectos">Proyectos y Documentos</a>
+        <a href="#pqrsf">Ventanilla PQRSF</a>
+        <a href="#infraestructura">Infraestructura TI</a>
+        <button class="btn-admin" id="btn-open-login">Acceso Funcionarios</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <span class="badge-tag">Plataforma Consolidada PaaS & Servicios TI 2026</span>
+      <h2>Conectando las Regiones de Colombia</h2>
+      <p>Gestión transparente de las concesiones viales, férreas, portuarias y aeroportuarias del país, respaldada por una infraestructura de servicios de alta disponibilidad y seguridad perimetral.</p>
+    </div>
+  </section>
+
+  <!-- Métricas Rápidas -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h3 id="stat-proyectos">5</h3>
+      <p>Mega Proyectos Estratégicos</p>
+    </div>
+    <div class="stat-card">
+      <h3>$9.7 B</h3>
+      <p>Inversión en Infraestructura (COP)</p>
+    </div>
+    <div class="stat-card">
+      <h3>921 km</h3>
+      <p>Redes Concesionadas y Férreas</p>
+    </div>
+    <div class="stat-card">
+      <h3>100%</h3>
+      <p>Transparencia y Documentos Públicos</p>
+    </div>
+  </div>
+
+  <!-- Contenedor Principal -->
+  <main class="container">
+
+    <!-- SERVICIO PÚBLICO 1: PROYECTOS Y DOCUMENTOS PÚBLICOS -->
+    <section id="proyectos" style="scroll-margin-top: 90px; margin-bottom: 50px;">
+      <div class="section-title">
+        <h2>1. Catálogo Público de Concesiones y Documentos Oficiales</h2>
+        <p>Servicio accesible al público para la consulta libre de proyectos y descarga directa de resoluciones, actas y pliegos en formato PDF (Open Data).</p>
+      </div>
+
+      <div class="controls-bar">
+        <div class="filter-group">
+          <button class="btn-filter active" data-mode="">Todos</button>
+          <button class="btn-filter" data-mode="CARRETERO">Carretero (4G/5G)</button>
+          <button class="btn-filter" data-mode="FERREO">Férreo</button>
+          <button class="btn-filter" data-mode="PORTUARIO">Portuario</button>
+          <button class="btn-filter" data-mode="AEROPORTUARIO">Aeroportuario</button>
+        </div>
+        <div>
+          <input type="text" id="search-input" class="search-input" placeholder="🔍 Buscar por nombre, código o depto...">
+        </div>
+      </div>
+
+      <div class="projects-grid" id="projects-container">
+        <!-- Renderizado dinámico desde app.js -->
+        <div style="text-align: center; grid-column: 1/-1; padding: 30px;">Cargando catálogo de proyectos desde la API...</div>
+      </div>
+    </section>
+
+    <!-- SERVICIO PÚBLICO 2: VENTANILLA PQRSF -->
+    <section id="pqrsf" style="scroll-margin-top: 90px; margin-bottom: 50px;">
+      <div class="section-title">
+        <h2>2. Ventanilla Única de Radicación y Seguimiento PQRSF</h2>
+        <p>Servicio accesible al público para canalizar peticiones, quejas, reclamos, sugerencias y felicitaciones ciudadanas ante la ANI con trazabilidad legal.</p>
+      </div>
+
+      <div class="pqrsf-container">
+        <!-- Formulario de Radicación -->
+        <div class="pqrsf-box">
+          <h3>📬 Radicar Nueva Solicitud Ciudadana</h3>
+          <form id="form-pqrsf">
+            <div class="form-group">
+              <label for="pqrsf-tipo">Tipo de Requerimiento *</label>
+              <select id="pqrsf-tipo" name="tipo" class="form-control" required>
+                <option value="PETICION">Petición de Información / Documentos</option>
+                <option value="QUEJA">Queja sobre Concesión o Trámite</option>
+                <option value="RECLAMO">Reclamo por Calidad de Servicio</option>
+                <option value="SUGERENCIA">Sugerencia de Mejora</option>
+                <option value="FELICITACION">Felicitación</option>
+              </select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div class="form-group">
+                <label for="pqrsf-nombre">Nombre o Razón Social *</label>
+                <input type="text" id="pqrsf-nombre" name="nombre" class="form-control" required placeholder="Ej: Carlos Restrepo">
+              </div>
+              <div class="form-group">
+                <label for="pqrsf-correo">Correo Electrónico *</label>
+                <input type="email" id="pqrsf-correo" name="correo" class="form-control" required placeholder="correo@ejemplo.com">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 2fr 2fr; gap: 10px;">
+              <div class="form-group">
+                <label for="pqrsf-tipo-doc">Tipo Doc.</label>
+                <select id="pqrsf-tipo-doc" name="tipoDoc" class="form-control">
+                  <option value="CC">CC</option>
+                  <option value="NIT">NIT</option>
+                  <option value="CE">CE</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="pqrsf-num-doc">Número Documento</label>
+                <input type="text" id="pqrsf-num-doc" name="numDoc" class="form-control" placeholder="Ej: 1094852331">
+              </div>
+              <div class="form-group">
+                <label for="pqrsf-telefono">Teléfono de Contacto</label>
+                <input type="text" id="pqrsf-telefono" name="telefono" class="form-control" placeholder="Ej: 3104567890">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="pqrsf-proyecto">Proyecto Relacionado</label>
+              <select id="pqrsf-proyecto" name="proyecto" class="form-control">
+                <option value="">(Opcional) Cargando proyectos...</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="pqrsf-asunto">Asunto del Requerimiento *</label>
+              <input type="text" id="pqrsf-asunto" name="asunto" class="form-control" required placeholder="Ej: Consulta sobre trazado y fechas de entrega">
+            </div>
+
+            <div class="form-group">
+              <label for="pqrsf-descripcion">Descripción Detallada *</label>
+              <textarea id="pqrsf-descripcion" name="descripcion" class="form-control" rows="3" required placeholder="Escriba aquí los hechos y fundamentos de su solicitud..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">Radicar Solicitud Oficial</button>
+          </form>
+
+          <div id="pqrsf-result" class="result-card"></div>
+        </div>
+
+        <!-- Consulta de Trámite por Radicado -->
+        <div class="pqrsf-box">
+          <h3>🔎 Consultar Estado de Radicado</h3>
+          <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 16px;">Ingrese el número de radicado emitido por la ANI para conocer la dependencia responsable y el estado de su trámite.</p>
+          
+          <form id="form-consulta-pqrsf">
+            <div class="form-group">
+              <label for="input-radicado">Número de Radicado Oficial *</label>
+              <input type="text" id="input-radicado" class="form-control" placeholder="Ej: ANI-2026-PQRSF-001048" required>
+            </div>
+            <button type="submit" class="btn-secondary" style="width: 100%; padding: 10px; font-size: 0.95rem; background: #0c3c60; color: white;">Consultar Avance</button>
+          </form>
+
+          <div id="lookup-result" class="result-card"></div>
+
+          <div style="margin-top: 24px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; font-size: 0.82rem; color: #1e40af;">
+            <strong>💡 Términos de Respuesta Legal (Ley 1755 de 2015):</strong>
+            <ul style="margin-left: 18px; margin-top: 6px;">
+              <li>Peticiones de documentos e información: 10 días hábiles.</li>
+              <li>Peticiones de interés general o particular: 15 días hábiles.</li>
+              <li>Consultas sobre materias a su cargo: 30 días hábiles.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ARQUITECTURA DE INFRAESTRUCTURA Y CONSOLIDACIÓN TI -->
+    <section id="infraestructura" style="scroll-margin-top: 90px;">
+      <div class="section-title">
+        <h2>3. Arquitectura y Consolidación de Servicios de TI</h2>
+        <p>Integración de servicios simulados para la administración y continuidad de negocio de la ANI (Dokploy, Traefik y Servidor Linux).</p>
+      </div>
+
+      <div class="ti-architecture-section">
+        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
+          <div>
+            <h3 style="color: #0c3c60;">Telemetría en Vivo del Servidor API</h3>
+            <span style="font-size: 0.85rem; color: #64748b;">Orquestación: Dokploy / Docker Swarm / Traefik Reverse Proxy</span>
+          </div>
+          <div style="display: flex; gap: 10px; font-size: 0.85rem;">
+            <div style="background: #f1f5f9; padding: 6px 12px; border-radius: 6px;">
+              ⏱️ <strong>Uptime:</strong> <span id="server-uptime">Cargando...</span>
+            </div>
+            <div style="background: #f1f5f9; padding: 6px 12px; border-radius: 6px;">
+              🧠 <strong>Memoria:</strong> <span id="server-mem">Cargando...</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="services-list-grid">
+          <div class="service-item">
+            <div class="service-item-title">
+              <span>NFS (Network File System)</span>
+              <span class="status-pill-ok">ACTIVO</span>
+            </div>
+            <p style="font-size: 0.82rem; color: #64748b; margin-top: 6px;">Almacenamiento centralizado montado en <code>/var/ani/documentos</code> para la descarga y subida de archivos oficiales.</p>
+          </div>
+
+          <div class="service-item">
+            <div class="service-item-title">
+              <span>NTP (Hora Oficial)</span>
+              <span class="status-pill-ok">ACTIVO</span>
+            </div>
+            <p style="font-size: 0.82rem; color: #64748b; margin-top: 6px;">Sincronización horaria legal en el servidor <code>10.88.199.10:123</code> para validez jurídica de radicados.</p>
+          </div>
+
+          <div class="service-item">
+            <div class="service-item-title">
+              <span>Samba (SMB/CIFS)</span>
+              <span class="status-pill-ok">ACTIVO</span>
+            </div>
+            <p style="font-size: 0.82rem; color: #64748b; margin-top: 6px;">Compartición de plantillas y expedientes en red hacia clientes Windows y macOS de los funcionarios.</p>
+          </div>
+
+          <div class="service-item">
+            <div class="service-item-title">
+              <span>NIS (Directorio LAN)</span>
+              <span class="status-pill-ok">ACTIVO</span>
+            </div>
+            <p style="font-size: 0.82rem; color: #64748b; margin-top: 6px;">Autenticación y mapas de cuentas del personal técnico de la ANI en el dominio <code>ani.lan</code>.</p>
+          </div>
+
+          <div class="service-item">
+            <div class="service-item-title">
+              <span>CUPS (Impresión)</span>
+              <span class="status-pill-ok">ACTIVO</span>
+            </div>
+            <p style="font-size: 0.82rem; color: #64748b; margin-top: 6px;">Servicio centralizado de colas de impresión para minutas contractuales y radicados físicos.</p>
+          </div>
+
+          <div class="service-item">
+            <div class="service-item-title">
+              <span>Traefik Proxy Perimetral</span>
+              <span class="status-pill-ok">ACTIVO</span>
+            </div>
+            <p style="font-size: 0.82rem; color: #64748b; margin-top: 6px;">Enrutamiento perimetral SSL, aislando los puertos internos y blindando la base de datos.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal Detalle del Proyecto & Documentos -->
+  <div class="modal-overlay" id="modal-project">
+    <div class="modal-content" style="max-width: 650px;">
+      <span class="close-modal" onclick="closeProjectModal()">&times;</span>
+      <div id="modal-project-body"></div>
+    </div>
+  </div>
+
+  <!-- Modal Login Administrativo -->
+  <div class="modal-overlay" id="modal-login">
+    <div class="modal-content">
+      <span class="close-modal" id="close-login-modal">&times;</span>
+      <h3 style="color: #0c3c60; margin-bottom: 10px;">Acceso Funcionarios y TI</h3>
+      <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 16px;">Ingrese sus credenciales corporativas para acceder al panel administrativo de la ANI.</p>
+      
+      <form id="form-login">
+        <div class="form-group">
+          <label for="login-email">Correo Electrónico Institucional</label>
+          <input type="email" id="login-email" name="email" class="form-control" value="admin@ani.gov.co" required>
+        </div>
+        <div class="form-group">
+          <label for="login-password">Contraseña</label>
+          <input type="password" id="login-password" name="password" class="form-control" value="adminANI2026!" required>
+        </div>
+        <div id="login-error" style="color: #e11d48; font-size: 0.85rem; margin-bottom: 12px; display: none;"></div>
+        <button type="submit" class="btn-submit">Ingresar al Panel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div style="max-width: 1200px; margin: 0 auto; line-height: 1.8;">
+      <p><strong>Agencia Nacional de Infraestructura - ANI</strong></p>
+      <p>Calle 24A # 59-42, Edificio T3, Bogotá D.C., Colombia | Línea Gratuita: 01 8000 11 20 40</p>
+      <p style="margin-top: 10px; font-size: 0.78rem; opacity: 0.8;">Proyecto de Administración de Infraestructura de TI — Universidad del Quindío (2026-2) | Desplegable en Dokploy PaaS</p>
+    </div>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

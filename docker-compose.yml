@@ -29,6 +29,24 @@ services:
       - "traefik.http.routers.ani-api.entrypoints=web"
       - "traefik.http.services.ani-api.loadbalancer.server.port=3000"
 
+  ani-admin-spa:
+    build:
+      context: ./admin_spa
+      dockerfile: Dockerfile
+    container_name: ani-admin-spa
+    restart: unless-stopped
+    ports:
+      - "3001:80"
+    networks:
+      - ani-net
+    depends_on:
+      - ani-web-api
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ani-admin.rule=Host(`admin.ani.ingeniero.app`) || Host(`admin.ani.local`)"
+      - "traefik.http.routers.ani-admin.entrypoints=web"
+      - "traefik.http.services.ani-admin.loadbalancer.server.port=80"
+
 networks:
   ani-net:
     driver: bridge

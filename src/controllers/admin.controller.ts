@@ -211,4 +211,150 @@ export class AdminController {
       serviciosLinuxConsolidados: services
     });
   }
+
+  // --- GESTIÓN DE USUARIOS ---
+
+  public static getUsuarios(req: AuthRequest, res: Response) {
+    const usuarios = db.getUsuarios();
+    res.json({
+      success: true,
+      total: usuarios.length,
+      data: usuarios
+    });
+  }
+
+  public static createUsuario(req: AuthRequest, res: Response) {
+    const { email, nombreCompleto, password, rol, cargo } = req.body;
+
+    if (!email || !nombreCompleto || !password || !rol) {
+      return res.status(400).json({
+        success: false,
+        error: 'Campos requeridos incompletos',
+        mensaje: 'Debe ingresar email, nombreCompleto, password y rol.'
+      });
+    }
+
+    if (db.findUserByEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Usuario ya existente',
+        mensaje: `El correo [${email}] ya se encuentra registrado.`
+      });
+    }
+
+    const nuevo = db.createUsuario({
+      email,
+      nombreCompleto,
+      password,
+      rol,
+      cargo: cargo || 'Funcionario ANI'
+    });
+
+    res.status(201).json({
+      success: true,
+      mensaje: 'Usuario registrado exitosamente',
+      data: nuevo
+    });
+  }
+
+  public static deleteUsuario(req: AuthRequest, res: Response) {
+    const { id } = req.params;
+    const ok = db.deleteUsuario(id);
+    if (!ok) {
+      return res.status(400).json({
+        success: false,
+        error: 'No se puede eliminar',
+        mensaje: 'El usuario no existe o se encuentra protegido (SuperAdmin).'
+      });
+    }
+
+    res.json({
+      success: true,
+      mensaje: 'Usuario eliminado exitosamente'
+    });
+  }
+
+  // --- CONSOLIDACIÓN SERVICIOS LINUX (MULTIPASS PLACEHOLDERS) ---
+
+  public static getServiciosLinux(req: AuthRequest, res: Response) {
+    const servicios = db.getServiciosLinux();
+    res.json({
+      success: true,
+      mensaje: 'Configuración de enlaces e IPs placeholder para Servidor Linux (Multipass)',
+      data: servicios
+    });
+  }
+
+  public static updateServicioLinux(req: AuthRequest, res: Response) {
+    const { id } = req.params;
+    const { ipPlaceholder, puerto, estado, detalles, rutaRecurso } = req.body;
+
+    const updated = db.updateServicioLinux(id, {
+      ...(ipPlaceholder && { ipPlaceholder }),
+      ...(puerto && { puerto: parseInt(puerto, 10) }),
+      ...(estado && { estado }),
+      ...(detalles && { detalles }),
+      ...(rutaRecurso && { rutaRecurso })
+    });
+
+    if (!updated) {
+      return res.status(404).json({
+        success: false,
+        error: 'Servicio no encontrado'
+      });
+    }
+
+    res.json({
+      success: true,
+      mensaje: `Servicio [${updated.nombre}] actualizado con IP placeholder [${updated.ipPlaceholder}]`,
+      data: updated
+    });
+  }
+
+  // --- CLIENTES LAN (MULTIPASS PLACEHOLDERS) ---
+
+  public static getClientesLAN(req: AuthRequest, res: Response) {
+    const clientes = db.getClientesLAN();
+    res.json({
+      success: true,
+      total: clientes.length,
+      data: clientes
+    });
+  }
+
+  public static createClienteLAN(req: AuthRequest, res: Response) {
+    const { nombre, departamentoOcupante, tipoSO, servicioUtilizado, ipPlaceholder } = req.body;
+
+    if (!nombre || !departamentoOcupante || !tipoSO || !servicioUtilizado) {
+      return res.status(400).json({
+        success: false,
+        error: 'Campos requeridos incompletos',
+        mensaje: 'Debe ingresar nombre, departamentoOcupante, tipoSO y servicioUtilizado.'
+      });
+    }
+
+    const nuevo = db.createClienteLAN({
+      nombre,
+      departamentoOcupante,
+      tipoSO,
+      servicioUtilizado,
+      ipPlaceholder: ipPlaceholder || '10.88.199.PLACEHOLDER_IP',
+      estado: 'PENDIENTE_MULTIPASS'
+    });
+
+    res.status(201).json({
+      success: true,
+      mensaje: 'Cliente LAN registrado',
+      data: nuevo
+    });
+  }
+
+  public static deleteClienteLAN(req: AuthRequest, res: Response) {
+    const { id } = req.params;
+    db.deleteClienteLAN(id);
+    res.json({
+      success: true,
+      mensaje: 'Cliente eliminado'
+    });
+  }
 }

@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
+    "build:admin": "cd admin_spa && npm run build",
+    "build:all": "npm run build && cd admin_spa && npm run build",
+    "admin:dev": "cd admin_spa && npm run dev",
     "start": "node dist/server.js",
     "test:health": "curl -s http://localhost:3000/health | jq"
   },

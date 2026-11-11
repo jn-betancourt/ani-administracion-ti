@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -25,6 +26,15 @@ app.use(express.urlencoded({ extended: true }));
 // Servidor Web Estático: Portal Institucional ANI
 const publicDir = path.join(__dirname, '../public');
 app.use(express.static(publicDir));
+
+// Servidor SPA de Administración (React / Vite)
+const adminSpaDir = path.join(__dirname, '../admin_spa/dist');
+if (fs.existsSync(adminSpaDir)) {
+  app.use('/admin', express.static(adminSpaDir));
+  app.get('/admin/*', (req, res) => {
+    res.sendFile(path.join(adminSpaDir, 'index.html'));
+  });
+}
 
 // Healthcheck y Monitoreo (Dokploy / Traefik)
 app.use('/health', healthRoutes);
@@ -76,6 +86,7 @@ const server = app.listen(config.port, () => {
   console.log(`==================================================================`);
   console.log(`  🚀 Servidor activo en puerto: ${config.port}`);
   console.log(`  🌐 Portal Web Estático:       http://localhost:${config.port}/`);
+  console.log(`  🛡️  Panel SPA Administración:  http://localhost:${config.port}/admin`);
   console.log(`  📋 Servicio 1 (Proyectos):   http://localhost:${config.port}/api/v1/public/proyectos`);
   console.log(`  📬 Servicio 2 (PQRSF):       http://localhost:${config.port}/api/v1/public/pqrsf`);
   console.log(`  🩺 Health Check:             http://localhost:${config.port}/health`);

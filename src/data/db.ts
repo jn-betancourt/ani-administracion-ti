@@ -4,9 +4,13 @@ import {
   DocumentoANI, 
   PQRSF, 
   UsuarioTI, 
+  ServicioLinuxConfig,
+  ClienteLAN,
   SEED_PROYECTOS, 
   SEED_DOCUMENTOS, 
-  SEED_PQRSF 
+  SEED_PQRSF,
+  SEED_SERVICIOS_LINUX,
+  SEED_CLIENTES_LAN
 } from './seedProjects';
 
 class InMemoryDatabase {
@@ -14,6 +18,8 @@ class InMemoryDatabase {
   private documentos: Map<string, DocumentoANI> = new Map();
   private pqrsf: Map<string, PQRSF> = new Map();
   private usuarios: Map<string, UsuarioTI> = new Map();
+  private serviciosLinux: Map<string, ServicioLinuxConfig> = new Map();
+  private clientesLAN: Map<string, ClienteLAN> = new Map();
   private pqrsfCounter: number = 1049;
 
   constructor() {
@@ -29,6 +35,12 @@ class InMemoryDatabase {
 
     // PQRSF
     SEED_PQRSF.forEach(item => this.pqrsf.set(item.radicado, { ...item }));
+
+    // Servicios Linux (con IPs placeholder)
+    SEED_SERVICIOS_LINUX.forEach(s => this.serviciosLinux.set(s.id, { ...s }));
+
+    // Clientes LAN (con IPs placeholder)
+    SEED_CLIENTES_LAN.forEach(c => this.clientesLAN.set(c.id, { ...c }));
 
     // Usuario Administrador por defecto
     const salt = bcrypt.genSaltSync(10);
@@ -55,6 +67,17 @@ class InMemoryDatabase {
       activo: true
     };
     this.usuarios.set(gestorUser.email, gestorUser);
+
+    const atencionUser: UsuarioTI = {
+      id: 'usr-atencion-003',
+      email: 'atencion@ani.gov.co',
+      nombreCompleto: 'Oficial de Radicación y PQRSF',
+      passwordHash: bcrypt.hashSync('atencionANI2026!', salt),
+      rol: 'ATENCION_CIUDADANO',
+      cargo: 'Líder de Ventanilla Única de Correspondencia',
+      activo: true
+    };
+    this.usuarios.set(atencionUser.email, atencionUser);
   }
 
   // --- MÉTODOS DE PROYECTOS ---
@@ -198,12 +221,79 @@ class InMemoryDatabase {
   }
 
   // --- MÉTODOS DE USUARIOS ---
+  public getUsuarios(): Omit<UsuarioTI, 'passwordHash'>[] {
+    return Array.from(this.usuarios.values()).map(u => ({
+      id: u.id,
+      email: u.email,
+      nombreCompleto: u.nombreCompleto,
+      rol: u.rol,
+      cargo: u.cargo,
+      activo: u.activo
+    }));
+  }
+
   public findUserByEmail(email: string): UsuarioTI | undefined {
     return this.usuarios.get(email.toLowerCase());
   }
 
   public findUserById(id: string): UsuarioTI | undefined {
     return Array.from(this.usuarios.values()).find(u => u.id === id);
+  }
+
+  public createUsuario(data: { email: string; nombreCompleto: string; password: string; rol: UsuarioTI['rol']; cargo: string }): Omit<UsuarioTI, 'passwordHash'> {
+    const salt = bcrypt.genSaltSync(10);
+    const passwordHash = bcrypt.hashSync(data.password, salt);
+    const id = `usr-${Date.now().toString().slice(-5)}`;
+
+    const user: UsuarioTI = {
+      id,
+      email: data.email.toLowerCase(),
+      nombreCompleto: data.nombreCompleto,
+      passwordHash,
+      rol: data.rol,
+      cargo: data.cargo,
+      activo: true
+    };
+
+    this.usuarios.set(user.email, user);
+    const { passwordHash: _, ...safeUser } = user;
+    return safeUser;
+  }
+
+  public deleteUsuario(id: string): boolean {
+    const user = this.findUserById(id);
+    if (!user || user.email === 'admin@ani.gov.co') return false; // Proteger superadmin
+    return this.usuarios.delete(user.email);
+  }
+
+  // --- MÉTODOS DE SERVICIOS LINUX (MULTIPASS PLACEHOLDERS) ---
+  public getServiciosLinux(): ServicioLinuxConfig[] {
+    return Array.from(this.serviciosLinux.values());
+  }
+
+  public updateServicioLinux(id: string, update: Partial<ServicioLinuxConfig>): ServicioLinuxConfig | null {
+    const current = this.serviciosLinux.get(id);
+    if (!current) return null;
+
+    const updated = { ...current, ...update };
+    this.serviciosLinux.set(id, updated);
+    return updated;
+  }
+
+  // --- MÉTODOS DE CLIENTES LAN (MULTIPASS PLACEHOLDERS) ---
+  public getClientesLAN(): ClienteLAN[] {
+    return Array.from(this.clientesLAN.values());
+  }
+
+  public createClienteLAN(data: Omit<ClienteLAN, 'id'>): ClienteLAN {
+    const id = `cli-${Date.now().toString().slice(-4)}`;
+    const nuevo: ClienteLAN = { ...data, id };
+    this.clientesLAN.set(id, nuevo);
+    return nuevo;
+  }
+
+  public deleteClienteLAN(id: string): boolean {
+    return this.clientesLAN.delete(id);
   }
 }
 

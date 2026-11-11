@@ -58,6 +58,130 @@ export interface UsuarioTI {
   activo: boolean;
 }
 
+export interface ServicioLinuxConfig {
+  id: string;
+  nombre: string;
+  tipoServicio: string;
+  protocolo: string;
+  puerto: number;
+  ipPlaceholder: string;
+  rutaRecurso?: string;
+  justificacion: string;
+  estado: 'CONFIGURABLE_MULTIPASS' | 'CONECTADO' | 'PENDIENTE';
+  detalles: string;
+}
+
+export interface ClienteLAN {
+  id: string;
+  nombre: string;
+  departamentoOcupante: string;
+  tipoSO: 'LINUX' | 'WINDOWS' | 'MACOS';
+  servicioUtilizado: 'NFS' | 'SAMBA' | 'NIS' | 'CUPS';
+  ipPlaceholder: string;
+  estado: 'PENDIENTE_MULTIPASS' | 'ASIGNADO';
+}
+
+export const SEED_SERVICIOS_LINUX: ServicioLinuxConfig[] = [
+  {
+    id: "nfs",
+    nombre: "NFS (Network File System v4)",
+    tipoServicio: "Almacenamiento Compartido / Repositorio Documental",
+    protocolo: "TCP / RPC",
+    puerto: 2049,
+    ipPlaceholder: "10.88.199.PLACEHOLDER_NFS_IP",
+    rutaRecurso: "/srv/nfs/ani_docs",
+    justificacion: "Proveer repositorio documental centralizado (emulación OneDrive) para la Backend API y estaciones de trabajo de funcionarios de la ANI.",
+    estado: "CONFIGURABLE_MULTIPASS",
+    detalles: "Montado localmente en el contenedor API en /var/ani/documentos."
+  },
+  {
+    id: "ntp",
+    nombre: "NTP (Network Time Protocol)",
+    tipoServicio: "Sincronización Horaria Legal",
+    protocolo: "UDP",
+    puerto: 123,
+    ipPlaceholder: "10.88.199.PLACEHOLDER_NTP_IP",
+    justificacion: "Garantizar estricta validez jurídica en marcas de tiempo de radicados PQRSF, actas de licitación y auditoría de accesos.",
+    estado: "CONFIGURABLE_MULTIPASS",
+    detalles: "Sincronizado con servidores stratum 2 de la red colombiana."
+  },
+  {
+    id: "nis",
+    nombre: "NIS (Network Information Service)",
+    tipoServicio: "Autenticación y Directorio LAN",
+    protocolo: "RPC / TCP",
+    puerto: 111,
+    ipPlaceholder: "10.88.199.PLACEHOLDER_NIS_IP",
+    rutaRecurso: "Dominio: ani.lan",
+    justificacion: "Centralizar los mapas de usuarios, contraseñas y grupos de los administradores y personal técnico en la intranet.",
+    estado: "CONFIGURABLE_MULTIPASS",
+    detalles: "Permite login único en terminales de trabajo Linux de la ANI."
+  },
+  {
+    id: "samba",
+    nombre: "Samba (SMB/CIFS)",
+    tipoServicio: "Compartición de Archivos Multiplataforma",
+    protocolo: "TCP",
+    puerto: 445,
+    ipPlaceholder: "10.88.199.PLACEHOLDER_SAMBA_IP",
+    rutaRecurso: "\\\\ani-srv\\ani_docs",
+    justificacion: "Facilitar el intercambio y edición de minutas contractuales a funcionarios que operan estaciones con Microsoft Windows y macOS.",
+    estado: "CONFIGURABLE_MULTIPASS",
+    detalles: "Recurso protegido por credenciales departamentales."
+  },
+  {
+    id: "cups",
+    nombre: "CUPS (Common Unix Printing System)",
+    tipoServicio: "Servidor de Impresión Centralizada",
+    protocolo: "IPP / HTTP",
+    puerto: 631,
+    ipPlaceholder: "10.88.199.PLACEHOLDER_CUPS_IP",
+    rutaRecurso: "ipp://10.88.199.PLACEHOLDER_CUPS_IP:631/printers/ani_sede_principal",
+    justificacion: "Gestionar de manera unificada las colas de impresión de radicados físicos, planos de concesión y resoluciones oficiales.",
+    estado: "CONFIGURABLE_MULTIPASS",
+    detalles: "Control de cuotas y auditoría de impresiones por dependencia."
+  }
+];
+
+export const SEED_CLIENTES_LAN: ClienteLAN[] = [
+  {
+    id: "cli-001",
+    nombre: "Estación Ingeniero Vial 1 (Ubuntu Linux)",
+    departamentoOcupante: "Gerencia Carretera y Concesiones",
+    tipoSO: "LINUX",
+    servicioUtilizado: "NFS",
+    ipPlaceholder: "10.88.199.PLACEHOLDER_CLIENT_1",
+    estado: "PENDIENTE_MULTIPASS"
+  },
+  {
+    id: "cli-002",
+    nombre: "Puesto Jurídico Concesiones (Windows 11)",
+    departamentoOcupante: "Oficina Asesora Jurídica",
+    tipoSO: "WINDOWS",
+    servicioUtilizado: "SAMBA",
+    ipPlaceholder: "10.88.199.PLACEHOLDER_CLIENT_2",
+    estado: "PENDIENTE_MULTIPASS"
+  },
+  {
+    id: "cli-003",
+    nombre: "Terminal Técnico Férreo (Debian Linux)",
+    departamentoOcupante: "Gerencia Férrea y Proyectos Especiales",
+    tipoSO: "LINUX",
+    servicioUtilizado: "NIS",
+    ipPlaceholder: "10.88.199.PLACEHOLDER_CLIENT_3",
+    estado: "PENDIENTE_MULTIPASS"
+  },
+  {
+    id: "cli-004",
+    nombre: "Ventanilla Radicación Física (Windows 11)",
+    departamentoOcupante: "Atención al Ciudadano y Correspondencia",
+    tipoSO: "WINDOWS",
+    servicioUtilizado: "CUPS",
+    ipPlaceholder: "10.88.199.PLACEHOLDER_CLIENT_4",
+    estado: "PENDIENTE_MULTIPASS"
+  }
+];
+
 export const SEED_PROYECTOS: ProyectoANI[] = [
   {
     id: "prj-001-bog-girardot",

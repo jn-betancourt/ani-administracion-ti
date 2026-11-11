@@ -55,4 +55,70 @@ router.get(
   AdminController.getTelemetriaServicios
 );
 
+// --- GESTIÓN DE USUARIOS ---
+router.get(
+  '/usuarios',
+  authenticateJWT,
+  requireRole(['ADMIN_TI']),
+  AdminController.getUsuarios
+);
+
+router.post(
+  '/usuarios',
+  authenticateJWT,
+  requireRole(['ADMIN_TI']),
+  AdminController.createUsuario
+);
+
+router.delete(
+  '/usuarios/:id',
+  authenticateJWT,
+  requireRole(['ADMIN_TI']),
+  AdminController.deleteUsuario
+);
+
+// --- CONSOLIDACIÓN SERVICIOS LINUX (MULTIPASS PLACEHOLDERS) ---
+router.get(
+  '/servicios-linux',
+  authenticateJWT,
+  requireRole(['ADMIN_TI']),
+  AdminController.getServiciosLinux
+);
+
+router.patch(
+  '/servicios-linux/:id',
+  authenticateJWT,
+  requireRole(['ADMIN_TI']),
+  AdminController.updateServicioLinux
+);
+
+router.put(
+  '/servicios-linux/:id',
+  authenticateJWT,
+  requireRole(['ADMIN_TI']),
+  AdminController.updateServicioLinux
+);
+
+// --- CLIENTES LAN (MULTIPASS PLACEHOLDERS) ---
+router.get(
+  '/clientes-lan',
+  authenticateJWT,
+  requireRole(['ADMIN_TI']),
+  AdminController.getClientesLAN
+);
+
+router.post(
+  '/clientes-lan',
+  authenticateJWT,
+  requireRole(['ADMIN_TI']),
+  AdminController.createClienteLAN
+);
+
+router.delete(
+  '/clientes-lan/:id',
+  authenticateJWT,
+  requireRole(['ADMIN_TI']),
+  AdminController.deleteClienteLAN
+);
+
 export default router;

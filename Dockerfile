@@ -23,7 +23,7 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=3030
 ENV STORAGE_PATH=/mnt/ani
 ENV SAMBA_MOUNT_PATH=/mnt/samba
 ENV WEB_SERVER_IP=10.88.199.214
@@ -43,10 +43,10 @@ COPY --from=backend-builder /app/dist ./dist
 COPY --from=spa-builder /app/admin_spa/dist ./admin_spa/dist
 COPY public ./public
 
-EXPOSE 3000
+EXPOSE 3030
 
 # Healthcheck para Docker Swarm y Dokploy
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3030/health || exit 1
 
 CMD ["node", "dist/server.js"]

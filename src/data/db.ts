@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import { ntpTimeAdapter } from '../services/abstraction/ntpTime.adapter';
 import { 
   ProyectoANI, 
   DocumentoANI, 
@@ -182,7 +183,8 @@ class InMemoryDatabase {
     this.pqrsfCounter += 1;
     const radicado = `ANI-2026-PQRSF-00${this.pqrsfCounter}`;
 
-    const now = new Date();
+    // Hora oficial sincronizada vía NTP con el servidor local de la ANI (10.88.199.195)
+    const now = ntpTimeAdapter.getOfficialDate();
     // 15 días hábiles aproximadamente 21 días calendario
     const limitDate = new Date(now.getTime() + 21 * 24 * 60 * 60 * 1000);
 
@@ -214,7 +216,7 @@ class InMemoryDatabase {
 
     existing.estado = 'RESPONDIDO';
     existing.respuestaOficial = respuesta;
-    existing.fechaRespuesta = new Date().toISOString();
+    existing.fechaRespuesta = ntpTimeAdapter.getOfficialISOString();
 
     this.pqrsf.set(radicado, existing);
     return existing;

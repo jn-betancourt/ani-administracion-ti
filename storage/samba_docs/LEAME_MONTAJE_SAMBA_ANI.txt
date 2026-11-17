@@ -1,0 +1,8 @@
+===================================================================
+AGENCIA NACIONAL DE INFRAESTRUCTURA (ANI)
+RECURSO COMPARTIDO MULTIPLATAFORMA SAMBA (SMB/CIFS)
+Servidor Origen: //10.88.199.195/compartido (sv-ani)
+Punto de Montura Cliente Web (10.88.199.214): /mnt/samba
+===================================================================
+Este directorio permite la interoperabilidad de archivos entre
+estaciones Windows, macOS, clientes Linux y el Backend en Dokploy.

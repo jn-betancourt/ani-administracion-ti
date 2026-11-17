@@ -254,4 +254,55 @@ export class ApiService {
     if (!data.success) throw new Error(data.mensaje);
     return data.data;
   }
+
+  public static async probarEscrituraVolumen(volumen: 'nfs' | 'samba'): Promise<any> {
+    const res = await fetch(`${API_BASE}/admin/servicios-linux/archivos-montados/${volumen}/prueba-escritura`, {
+      method: 'POST',
+      headers: this.getHeaders()
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.mensaje || 'Error en prueba de lectura/escritura');
+    return data.data;
+  }
+
+  public static async subirArchivoVolumen(volumen: 'nfs' | 'samba', file: File): Promise<any> {
+    const formData = new FormData();
+    formData.append('archivo', file);
+
+    const res = await fetch(`${API_BASE}/admin/servicios-linux/archivos-montados/${volumen}/subir`, {
+      method: 'POST',
+      headers: this.getHeaders(true),
+      body: formData
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.mensaje || 'Error al subir archivo al volumen');
+    return data.data;
+  }
+
+  public static async eliminarArchivoVolumen(volumen: 'nfs' | 'samba', nombre: string): Promise<void> {
+    const res = await fetch(`${API_BASE}/admin/servicios-linux/archivos-montados/${volumen}/${encodeURIComponent(nombre)}`, {
+      method: 'DELETE',
+      headers: this.getHeaders()
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.mensaje || 'Error al eliminar archivo');
+  }
+
+  public static async descargarArchivoVolumen(volumen: 'nfs' | 'samba', nombre: string): Promise<void> {
+    const res = await fetch(`${API_BASE}/admin/servicios-linux/archivos-montados/${volumen}/descargar/${encodeURIComponent(nombre)}`, {
+      headers: this.getHeaders()
+    });
+    if (!res.ok) {
+      throw new Error('No se pudo descargar el archivo desde el volumen');
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nombre;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  }
 }

@@ -12,20 +12,28 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - STORAGE_PATH=/app/storage/nfs_docs
+      - STORAGE_PATH=/mnt/ani
+      - SAMBA_MOUNT_PATH=/mnt/samba
       - JWT_SECRET=ani_seguridad_infraestructura_secret_2026_jwt
-      - NTP_SERVER=10.88.199.10
-      - NFS_SERVER=10.88.199.10:/srv/nfs/ani_docs
-      - SAMBA_SERVER=//10.88.199.10/ani_docs
-      - NIS_DOMAIN=ani.lan
-      - CUPS_SERVER=ipp://10.88.199.10:631/printers/ani_sede_principal
+      - WEB_SERVER_IP=10.88.199.214
+      - LINUX_SERVER_IP=10.88.199.195
+      - NTP_SERVER=10.88.199.195
+      - NFS_SERVER=10.88.199.195:/ani
+      - SAMBA_SERVER=//10.88.199.195/compartido
+      - NIS_DOMAIN=labnis
+      - NIS_SERVER=10.88.199.195
+      - CUPS_SERVER=ipp://10.88.199.195:631/printers/ani_sede_principal
     volumes:
-      - ./storage/nfs_docs:/app/storage/nfs_docs
+      # Montaje directo de los sistemas de archivos compartidos desde el host web (10.88.199.214)
+      - /mnt/ani:/mnt/ani:rw
+      - /mnt/samba:/mnt/samba:rw
+      # Almacenamiento local de respaldo
+      - ./storage:/app/storage:rw
     networks:
       - ani-net
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ani-api.rule=Host(`api.ani.ingeniero.app`) || Host(`ani.local`)"
+      - "traefik.http.routers.ani-api.rule=Host(`api.ani.ingeniero.app`) || Host(`ani.local`) || Host(`10.88.199.214`)"
       - "traefik.http.routers.ani-api.entrypoints=web"
       - "traefik.http.services.ani-api.loadbalancer.server.port=3000"
 

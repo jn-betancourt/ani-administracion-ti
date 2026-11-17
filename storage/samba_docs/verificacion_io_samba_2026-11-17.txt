@@ -1,0 +1,13 @@
+===================================================================
+ PRUEBA DE ESCRITURA Y LECTURA EN SISTEMA DE ARCHIVOS COMPARTIDO
+===================================================================
+ Entidad:               Agencia Nacional de Infraestructura (ANI)
+ Volumen Probado:       SAMBA (Samba SMB/CIFS (TCP 445))
+ Servidor Servicios:    sv-ani (10.88.199.195)
+ Recurso Remoto:        //10.88.199.195/compartido
+ Punto Montura Host:    /mnt/samba
+ Ruta Activa Contenedor:/home/juan/uq/proyects/admint-ti/ani_project/storage/samba_docs
+ Modo Capa Abstracción: PLACEHOLDER_ABSTRACTION
+ Hora Oficial NTP:      2026-11-17T16:42:33.686Z (Stratum 3, Offset 237ms)
+ Estado I/O:            ESCRITURA Y LECTURA VERIFICADA EXITOSAMENTE
+===================================================================

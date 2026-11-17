@@ -106,18 +106,37 @@ export interface NtpOfficialTimeData {
   detalles: string;
 }
 
+export interface MountedStorageFile {
+  nombre: string;
+  esDirectorio: boolean;
+  rutaCompleta: string;
+  rutaVirtualMontura?: string;
+  tamano?: string;
+  pesoBytes?: number;
+  fechaModificacion?: string;
+}
+
+export interface MountedVolumeInfo {
+  volumen?: 'nfs' | 'samba';
+  protocolo?: string;
+  servidorRemoto?: string;
+  origenRemoto?: string;
+  rutaMonturaObjetivo?: string;
+  rutaFisicaActiva?: string;
+  ruta?: string;
+  existe: boolean;
+  conectado?: boolean;
+  monturaKernelDetectada?: boolean;
+  modo?: string;
+  total?: number;
+  archivos: MountedStorageFile[];
+}
+
 export interface MountedStorageData {
-  nfs: {
-    existe: boolean;
-    ruta: string;
-    total?: number;
-    archivos: Array<{ nombre: string; esDirectorio: boolean; rutaCompleta: string }>;
-  };
-  samba: {
-    existe: boolean;
-    ruta: string;
-    total?: number;
-    archivos: Array<{ nombre: string; esDirectorio: boolean; rutaCompleta: string }>;
-  };
+  nfs: MountedVolumeInfo;
+  samba: MountedVolumeInfo;
   servidorLinuxIp: string;
+  servidorWebDokployIp?: string;
+  esPlaceholder?: boolean;
+  mensaje?: string;
 }

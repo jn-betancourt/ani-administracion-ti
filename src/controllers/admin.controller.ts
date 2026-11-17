@@ -10,6 +10,8 @@ import { telemetryService } from '../services/telemetry.service';
 import { DocumentoANI } from '../data/seedProjects';
 import { NtpClientService } from '../services/protocols/ntpClient.service';
 import { NetworkProberService } from '../services/protocols/networkProber.service';
+import { sharedStorageAdapter, SharedVolumeType } from '../services/abstraction/sharedStorage.adapter';
+import { ntpTimeAdapter } from '../services/abstraction/ntpTime.adapter';
 
 export class AdminController {
   public static login(req: AuthRequest, res: Response) {
@@ -128,7 +130,7 @@ export class AdminController {
       nombreArchivo: req.file.filename,
       pesoBytes: req.file.size,
       esPublico: esPublico === 'true' || esPublico === true,
-      fechaPublicacion: new Date().toISOString().split('T')[0],
+      fechaPublicacion: ntpTimeAdapter.getOfficialISOString().split('T')[0],
       resumen: resumen || 'Documento cargado desde el Panel de Administración de TI.'
     };
 
@@ -136,9 +138,33 @@ export class AdminController {
 
     res.status(201).json({
       success: true,
-      mensaje: 'Documento cargado exitosamente al repositorio NFS de la ANI.',
+      mensaje: 'Documento cargado exitosamente al repositorio NFS de la ANI con estampa horaria NTP.',
       data: nuevoDocumento
     });
+  }
+
+  public static downloadAdminDocumento(req: AuthRequest, res: Response) {
+    const { id } = req.params;
+    const documento = db.getDocumentoById(id);
+
+    if (!documento) {
+      return res.status(404).json({
+        success: false,
+        error: 'Documento no encontrado'
+      });
+    }
+
+    const filePath = storageService.getFilePath(documento.nombreArchivo, 'nfs');
+    if (!storageService.fileExists(documento.nombreArchivo, 'nfs')) {
+      return res.status(404).json({
+        success: false,
+        error: 'Archivo no disponible en el almacenamiento NFS'
+      });
+    }
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${documento.nombreArchivo}"`);
+    res.sendFile(filePath);
   }
 
   public static deleteDocumento(req: AuthRequest, res: Response) {
@@ -278,10 +304,22 @@ export class AdminController {
 
   public static async getHoraOficialNtp(req: AuthRequest, res: Response) {
     try {
-      const ntpData = await NtpClientService.queryTime(config.linuxServer.ntp, 123);
+      const ntpState = await ntpTimeAdapter.forceSync();
       res.json({
         success: true,
-        data: ntpData
+        data: {
+          servidor: ntpState.servidor,
+          puerto: ntpState.puerto,
+          estrato: ntpState.estrato,
+          precision: -18,
+          retardoRttMs: ntpState.rttMs,
+          desviacionOffsetMs: ntpState.offsetMs,
+          horaOficialServidor: ntpState.horaOficialActual,
+          horaLocalCliente: ntpState.horaLocalSistema,
+          sincronizado: ntpState.sincronizado,
+          modo: ntpState.modo,
+          detalles: ntpState.detalles
+        }
       });
     } catch (err: any) {
       res.status(504).json({
@@ -293,10 +331,92 @@ export class AdminController {
   }
 
   public static getArchivosMontados(req: AuthRequest, res: Response) {
-    const storageData = NetworkProberService.getMountedStorageFiles();
+    const storageData = sharedStorageAdapter.getAllMountedStorageStatus();
     res.json({
       success: true,
       data: storageData
+    });
+  }
+
+  public static async probarEscrituraVolumen(req: AuthRequest, res: Response) {
+    const rawVol = (req.params.volumen || 'nfs').toLowerCase();
+    const target: SharedVolumeType = rawVol === 'samba' ? 'samba' : 'nfs';
+
+    try {
+      const resultado = await sharedStorageAdapter.verifyReadWriteTest(target);
+      res.json({
+        success: true,
+        mensaje: resultado.detalles,
+        data: resultado
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        success: false,
+        error: 'Error en prueba de lectura/escritura',
+        mensaje: err.message
+      });
+    }
+  }
+
+  public static subirArchivoVolumen(req: AuthRequest, res: Response) {
+    const rawVol = (req.params.volumen || 'nfs').toLowerCase();
+    const target: SharedVolumeType = rawVol === 'samba' ? 'samba' : 'nfs';
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'Archivo requerido',
+        mensaje: 'Debe adjuntar un archivo en el campo "archivo".'
+      });
+    }
+
+    const volStatus = sharedStorageAdapter.getVolumeStatus(target);
+
+    res.status(201).json({
+      success: true,
+      mensaje: `Archivo [${req.file.filename}] almacenado en volumen ${target.toUpperCase()} (${volStatus.rutaMonturaObjetivo}) sincronizado con NTP (${ntpTimeAdapter.getOfficialISOString()}).`,
+      data: {
+        nombre: req.file.filename,
+        volumen: target,
+        rutaMontura: `${volStatus.rutaMonturaObjetivo}/${req.file.filename}`,
+        pesoBytes: req.file.size,
+        fechaSincronizadaNtp: ntpTimeAdapter.getOfficialISOString()
+      }
+    });
+  }
+
+  public static descargarArchivoVolumen(req: AuthRequest, res: Response) {
+    const rawVol = (req.params.volumen || 'nfs').toLowerCase();
+    const target: SharedVolumeType = rawVol === 'samba' ? 'samba' : 'nfs';
+    const { nombre } = req.params;
+
+    const fullPath = sharedStorageAdapter.resolveFilePathForDownload(target, nombre);
+    if (!fullPath) {
+      return res.status(404).json({
+        success: false,
+        error: 'Archivo no encontrado en el volumen montado'
+      });
+    }
+
+    res.download(fullPath, nombre);
+  }
+
+  public static eliminarArchivoVolumen(req: AuthRequest, res: Response) {
+    const rawVol = (req.params.volumen || 'nfs').toLowerCase();
+    const target: SharedVolumeType = rawVol === 'samba' ? 'samba' : 'nfs';
+    const { nombre } = req.params;
+
+    const ok = sharedStorageAdapter.deleteFile(target, nombre);
+    if (!ok) {
+      return res.status(404).json({
+        success: false,
+        error: 'No se pudo eliminar el archivo o no existe'
+      });
+    }
+
+    res.json({
+      success: true,
+      mensaje: `Archivo [${nombre}] eliminado del volumen ${target.toUpperCase()}.`
     });
   }
 

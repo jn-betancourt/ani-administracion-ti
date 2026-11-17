@@ -25,6 +25,13 @@ router.post(
   AdminController.uploadDocumento
 );
 
+router.get(
+  '/documentos/:id/download',
+  authenticateJWT,
+  requireRole(['ADMIN_TI', 'GESTOR_DOCUMENTAL']),
+  AdminController.downloadAdminDocumento
+);
+
 router.delete(
   '/documentos/:id', 
   authenticateJWT, 
@@ -104,6 +111,35 @@ router.get(
   authenticateJWT,
   requireRole(['ADMIN_TI', 'GESTOR_DOCUMENTAL']),
   AdminController.getArchivosMontados
+);
+
+router.post(
+  '/servicios-linux/archivos-montados/:volumen/prueba-escritura',
+  authenticateJWT,
+  requireRole(['ADMIN_TI', 'GESTOR_DOCUMENTAL']),
+  AdminController.probarEscrituraVolumen
+);
+
+router.post(
+  '/servicios-linux/archivos-montados/:volumen/subir',
+  authenticateJWT,
+  requireRole(['ADMIN_TI', 'GESTOR_DOCUMENTAL']),
+  storageService.volumeUploadMiddleware.single('archivo'),
+  AdminController.subirArchivoVolumen
+);
+
+router.get(
+  '/servicios-linux/archivos-montados/:volumen/descargar/:nombre',
+  authenticateJWT,
+  requireRole(['ADMIN_TI', 'GESTOR_DOCUMENTAL']),
+  AdminController.descargarArchivoVolumen
+);
+
+router.delete(
+  '/servicios-linux/archivos-montados/:volumen/:nombre',
+  authenticateJWT,
+  requireRole(['ADMIN_TI', 'GESTOR_DOCUMENTAL']),
+  AdminController.eliminarArchivoVolumen
 );
 
 router.get(

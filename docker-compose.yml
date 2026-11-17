@@ -8,10 +8,10 @@ services:
     container_name: ani-web-api
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3030:3030"
     environment:
       - NODE_ENV=production
-      - PORT=3000
+      - PORT=3030
       - STORAGE_PATH=/mnt/ani
       - SAMBA_MOUNT_PATH=/mnt/samba
       - JWT_SECRET=ani_seguridad_infraestructura_secret_2026_jwt
@@ -35,7 +35,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.ani-api.rule=Host(`api.ani.ingeniero.app`) || Host(`ani.local`) || Host(`10.88.199.214`)"
       - "traefik.http.routers.ani-api.entrypoints=web"
-      - "traefik.http.services.ani-api.loadbalancer.server.port=3000"
+      - "traefik.http.services.ani-api.loadbalancer.server.port=3030"
 
   ani-admin-spa:
     build:
@@ -44,7 +44,7 @@ services:
     container_name: ani-admin-spa
     restart: unless-stopped
     ports:
-      - "3001:80"
+      - "3001:81"
     networks:
       - ani-net
     depends_on:
@@ -53,7 +53,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.ani-admin.rule=Host(`admin.ani.ingeniero.app`) || Host(`admin.ani.local`)"
       - "traefik.http.routers.ani-admin.entrypoints=web"
-      - "traefik.http.services.ani-admin.loadbalancer.server.port=80"
+      - "traefik.http.services.ani-admin.loadbalancer.server.port=81"
 
 networks:
   ani-net:

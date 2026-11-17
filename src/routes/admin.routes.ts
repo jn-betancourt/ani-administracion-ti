@@ -77,7 +77,35 @@ router.delete(
   AdminController.deleteUsuario
 );
 
-// --- CONSOLIDACIÓN SERVICIOS LINUX (MULTIPASS PLACEHOLDERS) ---
+// --- CONSOLIDACIÓN SERVICIOS LINUX (MULTIPASS 10.88.199.195) ---
+router.get(
+  '/servicios-linux/en-vivo',
+  authenticateJWT,
+  requireRole(['ADMIN_TI']),
+  AdminController.getServiciosLinuxEnVivo
+);
+
+router.post(
+  '/servicios-linux/:id/probar',
+  authenticateJWT,
+  requireRole(['ADMIN_TI']),
+  AdminController.probarServicioLinux
+);
+
+router.get(
+  '/servicios-linux/ntp/hora-oficial',
+  authenticateJWT,
+  requireRole(['ADMIN_TI', 'ATENCION_CIUDADANO', 'GESTOR_DOCUMENTAL']),
+  AdminController.getHoraOficialNtp
+);
+
+router.get(
+  '/servicios-linux/archivos-montados',
+  authenticateJWT,
+  requireRole(['ADMIN_TI', 'GESTOR_DOCUMENTAL']),
+  AdminController.getArchivosMontados
+);
+
 router.get(
   '/servicios-linux',
   authenticateJWT,

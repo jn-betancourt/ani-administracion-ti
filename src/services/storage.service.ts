@@ -43,8 +43,16 @@ export class StorageService {
   }
 
   private initDirectory() {
-    if (!fs.existsSync(this.baseDir)) {
-      fs.mkdirSync(this.baseDir, { recursive: true });
+    try {
+      if (!fs.existsSync(this.baseDir)) {
+        fs.mkdirSync(this.baseDir, { recursive: true });
+      }
+    } catch (err) {
+      console.warn(`[STORAGE WARNING] No se pudo acceder a ${this.baseDir}, usando fallback ./storage/nfs_docs`);
+      this.baseDir = path.resolve('./storage/nfs_docs');
+      if (!fs.existsSync(this.baseDir)) {
+        fs.mkdirSync(this.baseDir, { recursive: true });
+      }
     }
   }
 

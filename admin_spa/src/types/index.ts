@@ -81,3 +81,43 @@ export interface SystemMetrics {
   };
   timestamp: string;
 }
+
+export interface LiveServiceHealth {
+  servicio: string;
+  protocolo: string;
+  puerto: number | string;
+  host: string;
+  estado: 'ACTIVO' | 'DEGRADADO' | 'INACTIVO';
+  latenciaMs: number;
+  detalles: string;
+  datosAdicionales?: Record<string, any>;
+}
+
+export interface NtpOfficialTimeData {
+  servidor: string;
+  puerto: number;
+  estrato: number;
+  precision: number;
+  retardoRttMs: number;
+  desviacionOffsetMs: number;
+  horaOficialServidor: string;
+  horaLocalCliente: string;
+  sincronizado: boolean;
+  detalles: string;
+}
+
+export interface MountedStorageData {
+  nfs: {
+    existe: boolean;
+    ruta: string;
+    total?: number;
+    archivos: Array<{ nombre: string; esDirectorio: boolean; rutaCompleta: string }>;
+  };
+  samba: {
+    existe: boolean;
+    ruta: string;
+    total?: number;
+    archivos: Array<{ nombre: string; esDirectorio: boolean; rutaCompleta: string }>;
+  };
+  servidorLinuxIp: string;
+}

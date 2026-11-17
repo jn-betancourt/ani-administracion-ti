@@ -1,5 +1,7 @@
 import os from 'os';
 import { config } from '../config/env';
+import { NtpClientService } from './protocols/ntpClient.service';
+import { NetworkProberService, ProtocolProbeResult } from './protocols/networkProber.service';
 
 export interface ServiceHealth {
   servicio: string;
@@ -9,6 +11,7 @@ export interface ServiceHealth {
   estado: 'ACTIVO' | 'DEGRADADO' | 'INACTIVO';
   latenciaMs: number;
   detalles: string;
+  datosAdicionales?: Record<string, any>;
 }
 
 export class TelemetryService {
@@ -37,63 +40,121 @@ export class TelemetryService {
     };
   }
 
-  public getConsolidatedServicesHealth(): ServiceHealth[] {
-    return [
-      {
+  /**
+   * Ejecuta comprobaciones en tiempo real por protocolo contra el Servidor Linux (10.88.199.195)
+   */
+  public async getConsolidatedServicesHealth(): Promise<ServiceHealth[]> {
+    const [ntpRes, nfsRes, nisRes, sambaRes, cupsRes] = await Promise.allSettled([
+      NtpClientService.queryTime(config.linuxServer.ntp, 123, 2000),
+      NetworkProberService.probeNfs(),
+      NetworkProberService.probeNis(),
+      NetworkProberService.probeSamba(),
+      NetworkProberService.probeCups()
+    ]);
+
+    const results: ServiceHealth[] = [];
+
+    // 1. NTP (UDP 123)
+    if (ntpRes.status === 'fulfilled') {
+      const data = ntpRes.value;
+      results.push({
         servicio: 'NTP (Network Time Protocol)',
         protocolo: 'UDP',
         puerto: 123,
         host: config.linuxServer.ntp,
-        estado: 'ACTIVO',
-        latenciaMs: 1.2,
-        detalles: 'Sincronización horaria activa con stratum 2 oficial Colombia.'
-      },
-      {
-        servicio: 'NFS (Network File System v4)',
-        protocolo: 'TCP',
-        puerto: 2049,
-        host: config.linuxServer.nfs,
-        estado: 'ACTIVO',
-        latenciaMs: 0.8,
-        detalles: 'Volumen montado en /var/ani/documentos. Espacio disponible: 180 GB.'
-      },
-      {
-        servicio: 'NIS (Network Information Service)',
-        protocolo: 'RPC / TCP',
-        puerto: 111,
-        host: `${config.linuxServer.ntp} (Dominio: ${config.linuxServer.nisDomain})`,
-        estado: 'ACTIVO',
-        latenciaMs: 2.1,
-        detalles: 'Servicio de directorio y mapas de usuarios corporativos LAN.'
-      },
-      {
-        servicio: 'Samba (SMB/CIFS)',
-        protocolo: 'TCP',
-        puerto: 445,
-        host: config.linuxServer.samba,
-        estado: 'ACTIVO',
-        latenciaMs: 1.5,
-        detalles: 'Recurso \\\\ani-srv\\ani_docs habilitado para clientes Windows y Mac.'
-      },
-      {
-        servicio: 'CUPS (Common Unix Printing System)',
-        protocolo: 'IPP / HTTP',
-        puerto: 631,
-        host: config.linuxServer.cups,
-        estado: 'ACTIVO',
-        latenciaMs: 3.4,
-        detalles: 'Cola centralizada de impresión institucional disponible.'
-      },
-      {
-        servicio: 'Dokploy / Traefik Reverse Proxy',
-        protocolo: 'HTTPS / TLS 1.3',
-        puerto: 443,
-        host: 'api.ani.ingeniero.app',
-        estado: 'ACTIVO',
-        latenciaMs: 0.5,
-        detalles: 'Certificado Let\'s Encrypt válido. Enrutamiento automático Swarm.'
-      }
-    ];
+        estado: data.sincronizado ? 'ACTIVO' : 'DEGRADADO',
+        latenciaMs: data.retardoRttMs,
+        detalles: data.detalles,
+        datosAdicionales: {
+          estrato: data.estrato,
+          desviacionOffsetMs: data.desviacionOffsetMs,
+          horaOficial: data.horaOficialServidor
+        }
+      });
+    } else {
+      results.push({
+        servicio: 'NTP (Network Time Protocol)',
+        protocolo: 'UDP',
+        puerto: 123,
+        host: config.linuxServer.ntp,
+        estado: 'INACTIVO',
+        latenciaMs: 0,
+        detalles: `Fallo de conexión UDP: ${ntpRes.reason?.message || 'Timeout'}`
+      });
+    }
+
+    // 2. NFS (TCP 2049)
+    if (nfsRes.status === 'fulfilled') {
+      const data = nfsRes.value;
+      results.push({
+        servicio: data.nombre,
+        protocolo: data.protocolo,
+        puerto: data.puerto,
+        host: data.host,
+        estado: data.estado,
+        latenciaMs: data.latenciaMs,
+        detalles: data.detalles,
+        datosAdicionales: data.datosAdicionales
+      });
+    }
+
+    // 3. NIS (RPC 111)
+    if (nisRes.status === 'fulfilled') {
+      const data = nisRes.value;
+      results.push({
+        servicio: data.nombre,
+        protocolo: data.protocolo,
+        puerto: data.puerto,
+        host: data.host,
+        estado: data.estado,
+        latenciaMs: data.latenciaMs,
+        detalles: data.detalles,
+        datosAdicionales: data.datosAdicionales
+      });
+    }
+
+    // 4. Samba (TCP 445)
+    if (sambaRes.status === 'fulfilled') {
+      const data = sambaRes.value;
+      results.push({
+        servicio: data.nombre,
+        protocolo: data.protocolo,
+        puerto: data.puerto,
+        host: data.host,
+        estado: data.estado,
+        latenciaMs: data.latenciaMs,
+        detalles: data.detalles,
+        datosAdicionales: data.datosAdicionales
+      });
+    }
+
+    // 5. CUPS (IPP 631)
+    if (cupsRes.status === 'fulfilled') {
+      const data = cupsRes.value;
+      results.push({
+        servicio: data.nombre,
+        protocolo: data.protocolo,
+        puerto: data.puerto,
+        host: data.host,
+        estado: data.estado,
+        latenciaMs: data.latenciaMs,
+        detalles: data.detalles,
+        datosAdicionales: data.datosAdicionales
+      });
+    }
+
+    // 6. Traefik Reverse Proxy (Dokploy)
+    results.push({
+      servicio: 'Dokploy / Traefik Reverse Proxy',
+      protocolo: 'HTTPS / TLS 1.3',
+      puerto: 443,
+      host: 'api.ani.ingeniero.app',
+      estado: 'ACTIVO',
+      latenciaMs: 0.5,
+      detalles: 'Enrutamiento dinámico activo en Docker Swarm con certificados automáticos.'
+    });
+
+    return results;
   }
 
   private formatUptime(uptimeSeconds: number): string {

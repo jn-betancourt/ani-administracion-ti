@@ -88,11 +88,11 @@ export const SEED_SERVICIOS_LINUX: ServicioLinuxConfig[] = [
     tipoServicio: "Almacenamiento Compartido / Repositorio Documental",
     protocolo: "TCP / RPC",
     puerto: 2049,
-    ipPlaceholder: "10.88.199.PLACEHOLDER_NFS_IP",
-    rutaRecurso: "/srv/nfs/ani_docs",
+    ipPlaceholder: "10.88.199.195",
+    rutaRecurso: "/srv/nfs/ani -> /mnt/ani",
     justificacion: "Proveer repositorio documental centralizado (emulación OneDrive) para la Backend API y estaciones de trabajo de funcionarios de la ANI.",
-    estado: "CONFIGURABLE_MULTIPASS",
-    detalles: "Montado localmente en el contenedor API en /var/ani/documentos."
+    estado: "CONECTADO",
+    detalles: "Montado activamente en /mnt/ani en el host web desde 10.88.199.195:/ani."
   },
   {
     id: "ntp",
@@ -100,10 +100,11 @@ export const SEED_SERVICIOS_LINUX: ServicioLinuxConfig[] = [
     tipoServicio: "Sincronización Horaria Legal",
     protocolo: "UDP",
     puerto: 123,
-    ipPlaceholder: "10.88.199.PLACEHOLDER_NTP_IP",
+    ipPlaceholder: "10.88.199.195",
+    rutaRecurso: "10.88.199.195:123/UDP",
     justificacion: "Garantizar estricta validez jurídica en marcas de tiempo de radicados PQRSF, actas de licitación y auditoría de accesos.",
-    estado: "CONFIGURABLE_MULTIPASS",
-    detalles: "Sincronizado con servidores stratum 2 de la red colombiana."
+    estado: "CONECTADO",
+    detalles: "Servicio ntpsec activo en sv-ani (Stratum 3, consultable vía dgram UDP)."
   },
   {
     id: "nis",
@@ -111,11 +112,11 @@ export const SEED_SERVICIOS_LINUX: ServicioLinuxConfig[] = [
     tipoServicio: "Autenticación y Directorio LAN",
     protocolo: "RPC / TCP",
     puerto: 111,
-    ipPlaceholder: "10.88.199.PLACEHOLDER_NIS_IP",
-    rutaRecurso: "Dominio: ani.lan",
+    ipPlaceholder: "10.88.199.195",
+    rutaRecurso: "Dominio: labnis (10.88.199.195:111)",
     justificacion: "Centralizar los mapas de usuarios, contraseñas y grupos de los administradores y personal técnico en la intranet.",
-    estado: "CONFIGURABLE_MULTIPASS",
-    detalles: "Permite login único en terminales de trabajo Linux de la ANI."
+    estado: "CONECTADO",
+    detalles: "ypserv y rpcbind registrados en sv-ani bajo el dominio labnis."
   },
   {
     id: "samba",
@@ -123,11 +124,11 @@ export const SEED_SERVICIOS_LINUX: ServicioLinuxConfig[] = [
     tipoServicio: "Compartición de Archivos Multiplataforma",
     protocolo: "TCP",
     puerto: 445,
-    ipPlaceholder: "10.88.199.PLACEHOLDER_SAMBA_IP",
-    rutaRecurso: "\\\\ani-srv\\ani_docs",
+    ipPlaceholder: "10.88.199.195",
+    rutaRecurso: "//10.88.199.195/compartido -> /mnt/samba",
     justificacion: "Facilitar el intercambio y edición de minutas contractuales a funcionarios que operan estaciones con Microsoft Windows y macOS.",
-    estado: "CONFIGURABLE_MULTIPASS",
-    detalles: "Recurso protegido por credenciales departamentales."
+    estado: "CONECTADO",
+    detalles: "Montado con credenciales de usuario ubuntu en /mnt/samba."
   },
   {
     id: "cups",
@@ -135,15 +136,24 @@ export const SEED_SERVICIOS_LINUX: ServicioLinuxConfig[] = [
     tipoServicio: "Servidor de Impresión Centralizada",
     protocolo: "IPP / HTTP",
     puerto: 631,
-    ipPlaceholder: "10.88.199.PLACEHOLDER_CUPS_IP",
-    rutaRecurso: "ipp://10.88.199.PLACEHOLDER_CUPS_IP:631/printers/ani_sede_principal",
+    ipPlaceholder: "10.88.199.195",
+    rutaRecurso: "ipp://10.88.199.195:631/printers/ani_sede_principal",
     justificacion: "Gestionar de manera unificada las colas de impresión de radicados físicos, planos de concesión y resoluciones oficiales.",
     estado: "CONFIGURABLE_MULTIPASS",
-    detalles: "Control de cuotas y auditoría de impresiones por dependencia."
+    detalles: "Diagnóstico de socket disponible hacia puerto 631 de sv-ani."
   }
 ];
 
 export const SEED_CLIENTES_LAN: ClienteLAN[] = [
+  {
+    id: "cli-000",
+    nombre: "Servidor Web Host (server Multipass / /mnt/ani & /mnt/samba)",
+    departamentoOcupante: "Infraestructura TI / Servidor Web & API",
+    tipoSO: "LINUX",
+    servicioUtilizado: "NFS",
+    ipPlaceholder: "10.88.199.214",
+    estado: "ASIGNADO"
+  },
   {
     id: "cli-001",
     nombre: "Estación Ingeniero Vial 1 (Ubuntu Linux)",

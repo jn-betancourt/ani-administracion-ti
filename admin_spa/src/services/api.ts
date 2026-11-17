@@ -1,4 +1,13 @@
-import { Usuario, Documento, PQRSF, ServicioLinuxConfig, ClienteLAN } from '../types';
+import { 
+  Usuario, 
+  Documento, 
+  PQRSF, 
+  ServicioLinuxConfig, 
+  ClienteLAN,
+  LiveServiceHealth,
+  NtpOfficialTimeData,
+  MountedStorageData
+} from '../types';
 
 const API_BASE = '/api/v1';
 
@@ -206,5 +215,43 @@ export class ApiService {
       headers: this.getHeaders()
     });
     return await res.json();
+  }
+
+  // --- SERVICIOS LINUX EN VIVO (10.88.199.195) ---
+  public static async getServiciosLinuxEnVivo(): Promise<LiveServiceHealth[]> {
+    const res = await fetch(`${API_BASE}/admin/servicios-linux/en-vivo`, {
+      headers: this.getHeaders()
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.mensaje);
+    return data.data;
+  }
+
+  public static async probarServicioLinux(id: string): Promise<any> {
+    const res = await fetch(`${API_BASE}/admin/servicios-linux/${id}/probar`, {
+      method: 'POST',
+      headers: this.getHeaders()
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.mensaje);
+    return data.data;
+  }
+
+  public static async getHoraOficialNtp(): Promise<NtpOfficialTimeData> {
+    const res = await fetch(`${API_BASE}/admin/servicios-linux/ntp/hora-oficial`, {
+      headers: this.getHeaders()
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.mensaje);
+    return data.data;
+  }
+
+  public static async getArchivosMontados(): Promise<MountedStorageData> {
+    const res = await fetch(`${API_BASE}/admin/servicios-linux/archivos-montados`, {
+      headers: this.getHeaders()
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.mensaje);
+    return data.data;
   }
 }

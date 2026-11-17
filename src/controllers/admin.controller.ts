@@ -8,6 +8,8 @@ import { AuthRequest } from '../middlewares/auth';
 import { storageService } from '../services/storage.service';
 import { telemetryService } from '../services/telemetry.service';
 import { DocumentoANI } from '../data/seedProjects';
+import { NtpClientService } from '../services/protocols/ntpClient.service';
+import { NetworkProberService } from '../services/protocols/networkProber.service';
 
 export class AdminController {
   public static login(req: AuthRequest, res: Response) {
@@ -201,14 +203,100 @@ export class AdminController {
 
   // --- TELEMETRÍA Y SERVICIOS LINUX ---
 
-  public static getTelemetriaServicios(req: AuthRequest, res: Response) {
+  public static async getTelemetriaServicios(req: AuthRequest, res: Response) {
     const system = telemetryService.getSystemMetrics();
-    const services = telemetryService.getConsolidatedServicesHealth();
+    const services = await telemetryService.getConsolidatedServicesHealth();
 
     res.json({
       success: true,
       servidorDokploy: system,
       serviciosLinuxConsolidados: services
+    });
+  }
+
+  public static async getServiciosLinuxEnVivo(req: AuthRequest, res: Response) {
+    try {
+      const services = await telemetryService.getConsolidatedServicesHealth();
+      res.json({
+        success: true,
+        servidorLinuxIp: config.linuxServer.ip,
+        data: services
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        success: false,
+        error: 'Error al consultar servicios en vivo',
+        mensaje: err.message
+      });
+    }
+  }
+
+  public static async probarServicioLinux(req: AuthRequest, res: Response) {
+    const { id } = req.params;
+
+    try {
+      let resultado: any;
+
+      switch (id.toLowerCase()) {
+        case 'ntp':
+          resultado = await NtpClientService.queryTime(config.linuxServer.ntp, 123);
+          break;
+        case 'nfs':
+          resultado = await NetworkProberService.probeNfs();
+          break;
+        case 'nis':
+          resultado = await NetworkProberService.probeNis();
+          break;
+        case 'samba':
+          resultado = await NetworkProberService.probeSamba();
+          break;
+        case 'cups':
+          resultado = await NetworkProberService.probeCups();
+          break;
+        default:
+          return res.status(400).json({
+            success: false,
+            error: 'Servicio no reconocido',
+            mensaje: `El id [${id}] no es válido. Opciones: ntp, nfs, nis, samba, cups.`
+          });
+      }
+
+      res.json({
+        success: true,
+        servicioId: id,
+        data: resultado
+      });
+    } catch (err: any) {
+      res.status(502).json({
+        success: false,
+        servicioId: id,
+        error: 'Fallo al ejecutar protocolo de prueba',
+        mensaje: err.message
+      });
+    }
+  }
+
+  public static async getHoraOficialNtp(req: AuthRequest, res: Response) {
+    try {
+      const ntpData = await NtpClientService.queryTime(config.linuxServer.ntp, 123);
+      res.json({
+        success: true,
+        data: ntpData
+      });
+    } catch (err: any) {
+      res.status(504).json({
+        success: false,
+        error: 'Servidor NTP no disponible',
+        mensaje: err.message
+      });
+    }
+  }
+
+  public static getArchivosMontados(req: AuthRequest, res: Response) {
+    const storageData = NetworkProberService.getMountedStorageFiles();
+    res.json({
+      success: true,
+      data: storageData
     });
   }
 

@@ -13,8 +13,14 @@ import { errorHandler, notFoundHandler } from './middlewares/errorHandler';
 const app = express();
 
 // Middlewares de seguridad y observabilidad
+// Se desactivan HSTS (Strict-Transport-Security) y COOP/CORP para permitir acceso HTTP directo
+// por IP (10.88.199.214), localhost y túneles inversos sin que el navegador fuerce HTTPS.
 app.use(helmet({
-  contentSecurityPolicy: false // Permite cargar recursos visuales y scripts del portal estático
+  contentSecurityPolicy: false,
+  strictTransportSecurity: false,
+  crossOriginOpenerPolicy: false,
+  crossOriginResourcePolicy: false,
+  originAgentCluster: false
 }));
 app.use(cors({
   origin: config.corsOrigin
@@ -27,11 +33,12 @@ app.use(express.urlencoded({ extended: true }));
 const publicDir = path.join(__dirname, '../public');
 app.use(express.static(publicDir));
 
-// Servidor SPA de Administración (React / Vite)
+// Servidor SPA de Administración (React / Vite) integrado en el mismo dominio (/admin)
 const adminSpaDir = path.join(__dirname, '../admin_spa/dist');
 if (fs.existsSync(adminSpaDir)) {
-  app.use('/admin', express.static(adminSpaDir));
-  app.get('/admin/*', (req, res) => {
+  app.use('/admin', express.static(adminSpaDir, { redirect: false }));
+  app.use('/assets', express.static(path.join(adminSpaDir, 'assets')));
+  app.get(['/admin', '/admin/*'], (req, res) => {
     res.sendFile(path.join(adminSpaDir, 'index.html'));
   });
 }

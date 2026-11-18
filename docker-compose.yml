@@ -35,7 +35,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=dokploy-network"
-      - "traefik.http.routers.ani-api.rule=Host(`api.ani.ingeniero.app`) || Host(`ani.local`) || Host(`10.88.199.214`)"
+      - "traefik.http.routers.ani-api.rule=Host(`ani.ingeniero.app`) || Host(`api.ani.ingeniero.app`) || Host(`ani.local`) || Host(`10.88.199.214`)"
       - "traefik.http.routers.ani-api.entrypoints=web"
       - "traefik.http.services.ani-api.loadbalancer.server.port=3030"
 

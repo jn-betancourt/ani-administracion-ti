@@ -15,7 +15,7 @@ const resolvedSambaPath = fs.existsSync(configuredSambaPath)
   : path.resolve('./storage/samba_docs');
 
 export const config = {
-  port: parseInt(process.env.PORT || '3000', 10),
+  port: parseInt(process.env.PORT || '3030', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
   jwtSecret: process.env.JWT_SECRET || 'ani_seguridad_infraestructura_secret_2026_jwt',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '15m',

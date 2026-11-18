@@ -45,8 +45,8 @@ COPY public ./public
 
 EXPOSE 3030
 
-# Healthcheck para Docker Swarm y Dokploy
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+# Healthcheck para Docker Swarm y Dokploy (start-period extendido para permitir sincronización NTP)
+HEALTHCHECK --interval=20s --timeout=5s --start-period=30s --retries=5 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3030/health || exit 1
 
 CMD ["node", "dist/server.js"]

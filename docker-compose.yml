@@ -31,8 +31,10 @@ services:
       - ./storage:/app/storage:rw
     networks:
       - ani-net
+      - dokploy-network
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=dokploy-network"
       - "traefik.http.routers.ani-api.rule=Host(`api.ani.ingeniero.app`) || Host(`ani.local`) || Host(`10.88.199.214`)"
       - "traefik.http.routers.ani-api.entrypoints=web"
       - "traefik.http.services.ani-api.loadbalancer.server.port=3030"
@@ -47,10 +49,12 @@ services:
       - "3001:81"
     networks:
       - ani-net
+      - dokploy-network
     depends_on:
       - ani-web-api
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=dokploy-network"
       - "traefik.http.routers.ani-admin.rule=Host(`admin.ani.ingeniero.app`) || Host(`admin.ani.local`)"
       - "traefik.http.routers.ani-admin.entrypoints=web"
       - "traefik.http.services.ani-admin.loadbalancer.server.port=81"
@@ -58,3 +62,5 @@ services:
 networks:
   ani-net:
     driver: bridge
+  dokploy-network:
+    external: true
